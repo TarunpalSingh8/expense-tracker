@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expense Tracker</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:820px;margin:2rem auto;padding:0 1rem;color:#222}
+  .card{border:1px solid #ddd;border-radius:10px;padding:1rem;margin:1rem 0}
+  form.add{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem}
+  input,select,button{padding:.5rem;border:1px solid #bbb;border-radius:6px;font:inherit}
+  button{background:#2b5fd9;color:#fff;border:0;cursor:pointer}
+  button.del{background:#c0392b;padding:.25rem .6rem}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:.45rem;border-bottom:1px solid #eee}
+  .error{background:#fdecea;color:#a1271c;padding:.6rem;border-radius:6px}
+  .chips span{display:inline-block;background:#eef2ff;border-radius:999px;padding:.2rem .7rem;margin:.15rem}
+</style>
+</head>
+<body>
+<h1>Expense Tracker</h1>
+<p>Total spent: <strong>₹{{ "%.2f"|format(summary.total) }}</strong></p>
+<div class="chips">
+  {% for cat, amt in summary.by_category.items() %}<span>{{ cat }}: ₹{{ "%.2f"|format(amt) }}</span>{% endfor %}
+</div>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<div class="card">
+  <form class="add" method="post" action="{{ url_for('main.add_from_form') }}">
+    <input name="amount" type="number" step="0.01" placeholder="Amount" required>
+    <select name="category">{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>
+    <input name="description" placeholder="Description" maxlength="100" required>
+    <input name="date" type="date">
+    <button type="submit">Add</button>
+  </form>
+</div>
+<div class="card">
+  {% if expenses %}
+  <table>
+    <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th></th></tr>
+    {% for e in expenses %}
+    <tr>
+      <td>{{ e.date }}</td><td>{{ e.category }}</td><td>{{ e.description }}</td>
+      <td>₹{{ "%.2f"|format(e.amount) }}</td>
+      <td><form method="post" action="{{ url_for('main.delete_from_form', expense_id=e.id) }}">
+        <button class="del" type="submit">Delete</button></form></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p>No expenses yet. Add your first one above.</p>{% endif %}
+</div>
+</body>
+</html>
